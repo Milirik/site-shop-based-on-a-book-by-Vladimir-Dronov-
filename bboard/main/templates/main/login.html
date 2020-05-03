@@ -1,0 +1,23 @@
+{% extends "layout/basic.html" %}
+
+{% load bootstrap4 %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+	{% if user.is_authenticated %}
+	<p>Вы уже выполнили вход</p>
+	{% else %}
+	<form method="post">
+		{% csrf_token %}
+		{% bootstrap_form form layout='vertical' %}
+
+		<input type="hidden" name="text" value="{{ next }}">
+		<a class="col nav" href="{% url 'main:password_reset' %}">Забыли пароль?</a>
+		<a class="col nav" href="{% url 'social:begin' 'vk-oauth2'%}">Войти через ВКонтакте</a>
+		<br>
+		{% buttons submit='Войти' %}{% endbuttons %}
+	</form>
+
+	{% endif %}
+{% endblock %}
