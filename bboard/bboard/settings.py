@@ -44,6 +44,8 @@ SOCIAL_AUTH_VK_OAUTH2_SECRET = 'G6sGiS5ghSHxy2oaGDEe'
 SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
+THUMBNAIL_BASEDIR = 'thumbnails'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,7 +56,18 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'bootstrap4',
     'social_django',
+    'django_cleanup',
+    'easy_thumbnails',
 ]
+
+THUMBNAIL_ALIASES = {
+    '': {
+        'default':{
+            'size':(96, 96),
+            'crop':'scale',
+        },
+    },
+}
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.vk.VKOAuth2',
@@ -86,6 +99,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+                'main.middlewares.bboard_context_processor',
             ],
         },
     },
@@ -142,3 +156,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Media files
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

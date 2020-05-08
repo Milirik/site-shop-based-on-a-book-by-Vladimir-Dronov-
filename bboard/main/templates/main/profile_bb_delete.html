@@ -1,0 +1,25 @@
+{% extends "layout/basic.html" %}
+
+{% load bootstrap4 %}
+
+{% block title %}
+	Удаление объявления
+{% endblock title %}
+
+{% block content %}
+	<h2>Удаление объявления</h2>
+	<p>Вы действительно хотите удалить обявление? </p>
+
+	<div class="col border">
+		<h2>{{ bb.title }}</h2>
+		<p>{{ bb.content }}</p>
+		<p class="font-weight-bold">{{ bb.price }} руб.</p>
+		<p>{{ bb.contacts }}</p>
+		<p class="font-italic">Объявление добавлено {{ bb.created_at }}</p>
+	</div>
+
+	<form method="post">
+		{% csrf_token %}
+		<div class="mt-4">{% buttons submit='Удалить' %}{% endbuttons %}</div>
+	</form>
+{% endblock content %}
