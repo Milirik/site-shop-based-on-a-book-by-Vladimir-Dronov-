@@ -22,6 +22,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.views import PasswordResetView , PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 
 urlpatterns = [
+    path('captcha/', include('captcha.urls')),
     path('admin/', admin.site.urls),
     path('', include('main.urls', namespace='')),
     path('social/', include('social_django.urls', namespace='social')),  

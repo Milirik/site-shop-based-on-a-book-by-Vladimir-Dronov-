@@ -1,18 +1,11 @@
 from django.db import models
 from django.dispatch import Signal
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save
 
-from .utilities import send_activation_notification, get_timestamp_path
+from .utilities import send_activation_notification, get_timestamp_path, send_new_comment_notification
 
 # User
-user_registrated = Signal(providing_args=['instance'])
-
-def user_registrated_dispatcher(sender, **kwargs):
-	send_activation_notification(kwargs['instance'])
-
-user_registrated.connect(user_registrated_dispatcher)
-
-		
 class AdvUser(AbstractUser):
 	is_activated = models.BooleanField(default=True, db_index=True, verbose_name='Прошел активацию?')
 	send_messages = models.BooleanField(default=True, verbose_name='Слать оповещения о новых комментариях?')
@@ -82,7 +75,9 @@ class Bb(models.Model):
 		for ai in self.aditionalimage_set.all():
 			ai.delete()
 		super().delete(*args, **kwargs)
-
+		
+	def __str__(self):
+		return self.title
 
 	class Meta:
 		verbose_name_plural = 'Объявления'
@@ -96,3 +91,33 @@ class AditionalImage(models.Model):
 	class Meta:
 		verbose_name_plural = 'Дополнительные илюстрации'
 		verbose_name = 'Дополнительная илюстрация'
+
+#Comment
+class Comment(models.Model):
+	bb = models.ForeignKey('Bb', on_delete=models.CASCADE, verbose_name='Объявление')
+	author = models.CharField(max_length=30, verbose_name='Автор')
+	content = models.TextField(verbose_name='Содержание')
+	is_active = models.BooleanField(default=True, db_index=True, verbose_name='Выводить на экран?')
+	created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Опубликован')
+
+
+	class Meta:
+		verbose_name_plural = 'Комментарии'
+		verbose_name = 'Комментарий'
+		ordering = ['created_at']
+
+
+#Signals
+
+user_registrated = Signal(providing_args=['instance'])
+
+def user_registrated_dispatcher(sender, **kwargs):
+	send_activation_notification(kwargs['instance'])
+
+def post_save_dispatcher(sender, **kwargs):
+	author = kwargs['instance'].bb.author
+	if kwargs['created'] and author.send_messages:
+		send_new_comment_notification(kwargs['instance'])
+
+user_registrated.connect(user_registrated_dispatcher)
+post_save.connect(post_save_dispatcher, sender=Comment)

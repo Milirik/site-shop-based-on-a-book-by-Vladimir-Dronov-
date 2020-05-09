@@ -1,6 +1,6 @@
 from django.contrib import admin
 import datetime
-from .models import AdvUser, SuperRubric, SubRubric, Bb, AditionalImage
+from .models import AdvUser, SuperRubric, SubRubric, Bb, AditionalImage, Comment
 from .forms import SubRubricForm
 from .utilities import send_activation_notification
 
@@ -73,8 +73,15 @@ class BbAdmin(admin.ModelAdmin):
 	inlines = (AditionalImageInline,)
 
 
+class CommentAdmin(admin.ModelAdmin):
+	list_display = ('bb', 'author', 'content')
+
+
+
+
 # Register your models here.
 admin.site.register(AdvUser, AdvUserAdmin)
 admin.site.register(SuperRubric, SuperRubricAdmin)
 admin.site.register(SubRubric, SubRubricAdmin)
 admin.site.register(Bb, BbAdmin)
+admin.site.register(Comment, CommentAdmin)

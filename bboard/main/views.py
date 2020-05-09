@@ -21,8 +21,8 @@ from django.http import HttpResponse, Http404
 
 from django.db.models import Q
 
-from .forms import ChangeUserInfoForm, RegisterUserForm, SearchForm, BbForm, AIFormSet
-from .models import AdvUser, SubRubric, Bb
+from .forms import ChangeUserInfoForm, RegisterUserForm, SearchForm, BbForm, AIFormSet, UserCommentForm, GuestCommentForm
+from .models import AdvUser, SubRubric, Bb, Comment
 from .utilities import signer
 
 
@@ -33,7 +33,6 @@ def index(request):
 	return render(request, 'main/index.html', context)
 
 def by_rubric(request, pk):
-	print(1)
 	rubric = get_object_or_404(SubRubric, pk=pk)
 	bbs = Bb.objects.filter(is_active=True, rubric=pk)
 	if 'keyword' in request.GET:
@@ -55,7 +54,23 @@ def by_rubric(request, pk):
 def detail(request, rubric_pk, pk):
 	bb = get_object_or_404(Bb, pk=pk)
 	ais = bb.aditionalimage_set.all()
-	context = {'bb':bb, 'ais': ais}
+	comments = Comment.objects.filter(bb=pk, is_active=True)
+	initial={'bb': bb.pk}
+	if request.user.is_authenticated:
+		initial['author'] = request.user.username
+		form_class = UserCommentForm
+	else:
+		form_class = GuestCommentForm
+	form = form_class(initial=initial)
+	if request.method == 'POST':
+		c_form = form_class(request.POST)
+		if c_form.is_valid():
+			c_form.save()
+			messages.add_message(request, messages.SUCCESS, 'Комментарий добавлен')
+		else:
+			form = c_form
+			messages.add_message(request, messages.WARNING, 'Комментарий не доабвлен')
+	context = {'bb': bb, 'ais': ais, 'comments': comments, 'form': form}		
 	return render(request, 'main/detail.html', context)
 
 def other_page(request, page):
